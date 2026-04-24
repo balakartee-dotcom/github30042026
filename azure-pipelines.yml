@@ -6,7 +6,9 @@ trigger:
       - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: Default
+  demands:
+    - agent.name -equals VENKAT
 
 variables:
   imageName: 'venkateshs111/springboot-hello-azure-devops'
@@ -14,13 +16,20 @@ variables:
   jarName: 'springboot-hello-1.0.0.jar'
 
 stages:
+
+# =========================
+# BUILD STAGE
+# =========================
 - stage: Build
+  displayName: Build Stage
   jobs:
   - job: MavenBuild
+    displayName: Maven Build
     steps:
     - checkout: self
 
     - task: Maven@3
+      displayName: 'Build with Maven'
       inputs:
         mavenPomFile: 'pom.xml'
         goals: 'clean package'
@@ -28,37 +37,48 @@ stages:
         jdkVersionOption: '1.8'
 
     - task: CopyFiles@2
+      displayName: 'Copy JAR'
       inputs:
         SourceFolder: '$(System.DefaultWorkingDirectory)/target'
         Contents: '$(jarName)'
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
     - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact'
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'app-jar'
         publishLocation: 'pipeline'
 
+
+# =========================
+# DOCKER BUILD & PUSH
+# =========================
 - stage: Docker
+  displayName: Docker Build & Push
   dependsOn: Build
   jobs:
   - job: DockerBuildPush
+    displayName: Docker Build and Push
     steps:
     - checkout: self
 
     - task: DownloadPipelineArtifact@2
+      displayName: 'Download JAR'
       inputs:
         buildType: 'current'
         artifactName: 'app-jar'
         targetPath: '$(Pipeline.Workspace)/app-jar'
 
     - task: CopyFiles@2
+      displayName: 'Copy JAR to target folder'
       inputs:
         SourceFolder: '$(Pipeline.Workspace)/app-jar'
         Contents: '$(jarName)'
         TargetFolder: '$(Build.SourcesDirectory)/target'
 
     - task: Docker@2
+      displayName: 'Build and Push Docker Image'
       inputs:
         containerRegistry: '$(dockerRegistryServiceConnection)'
         repository: '$(imageName)'
@@ -68,3 +88,28 @@ stages:
         tags: |
           $(Build.BuildId)
           latest
+
+
+# =========================
+# DEPLOY STAGE (LOCAL MACHINE)
+# =========================
+- stage: Deploy
+  displayName: Deploy to Local (VENKAT)
+  dependsOn: Docker
+  jobs:
+  - job: RunContainer
+    displayName: Run Docker Container
+    steps:
+    - script: |
+        echo "Deploying container on VENKAT (local machine)..."
+
+        docker pull $(imageName):latest
+
+        docker stop springboot-app || true
+        docker rm springboot-app || true
+
+        docker run -d -p 8080:8080 \
+          --name springboot-app \
+          $(imageName):latest
+
+      displayName: 'Run Docker Container'
