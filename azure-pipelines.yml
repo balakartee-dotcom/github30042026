@@ -6,7 +6,7 @@ trigger:
       - main
 
 pool:
-  name: Default
+  name: Default   # uses your VENKAT agent automatically
 
 variables:
   imageName: 'venkateshs111/springboot-hello-azure-devops'
@@ -89,7 +89,7 @@ stages:
 
 
 # =========================
-# DEPLOY STAGE (LOCAL MACHINE)
+# DEPLOY STAGE (WINDOWS SAFE)
 # =========================
 - stage: Deploy
   displayName: Deploy to Local (VENKAT)
@@ -99,15 +99,13 @@ stages:
     displayName: Run Docker Container
     steps:
     - script: |
-        echo "Deploying container on VENKAT (local machine)..."
+        echo Deploying container on VENKAT...
 
         docker pull $(imageName):latest
 
-        docker stop springboot-app || true
-        docker rm springboot-app || true
+        docker stop springboot-app 2>nul
+        docker rm springboot-app 2>nul
 
-        docker run -d -p 8080:8080 \
-          --name springboot-app \
-          $(imageName):latest
+        docker run -d -p 8080:8080 --name springboot-app $(imageName):latest
 
       displayName: 'Run Docker Container'
