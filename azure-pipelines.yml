@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://json.schemastore.org/azure-pipelines.json
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'venkateshs111/springboot-hello-azure-devops'
+  dockerRegistryServiceConnection: 'dockerhub-connection'
+  jarName: 'springboot-hello-1.0.0.jar'
+
+stages:
+- stage: Build
+  jobs:
+  - job: MavenBuild
+    steps:
+    - checkout: self
+
+    - task: Maven@3
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'clean package'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.8'
+
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/target'
+        Contents: '$(jarName)'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'app-jar'
+        publishLocation: 'pipeline'
+
+- stage: Docker
+  dependsOn: Build
+  jobs:
+  - job: DockerBuildPush
+    steps:
+    - checkout: self
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'app-jar'
+        targetPath: '$(Pipeline.Workspace)/app-jar'
+
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Pipeline.Workspace)/app-jar'
+        Contents: '$(jarName)'
+        TargetFolder: '$(Build.SourcesDirectory)/target'
+
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageName)'
+        command: 'buildAndPush'
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)'
+        tags: |
+          $(Build.BuildId)
+          latest
