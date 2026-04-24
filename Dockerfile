@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:8-jdk
 WORKDIR /app
 COPY target/springboot-hello-1.0.0.jar app.jar
 EXPOSE 8080
