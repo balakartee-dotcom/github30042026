@@ -9,7 +9,7 @@ pool:
   name: Default
 
 variables:
-  imageName: 'venkateshs111/springboot-hello-azure-devops'
+  imageName: 'karthik20151987/springboot'
   dockerRegistryServiceConnection: 'dockerhub-connection'
   jarName: 'springboot-hello-1.0.0.jar'
   imageTag: '$(Build.BuildId)'
