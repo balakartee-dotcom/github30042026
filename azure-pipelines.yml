@@ -34,8 +34,8 @@ stages:
       inputs:
         mavenPOMFile: 'pom.xml'
         goals: 'clean package'
-        javaHomeOption: 'JDKVersion'
-        jdkVersionOption: '1.8'
+        #javaHomeOption: 'JDKVersion'
+        #jdkVersionOption: '1.8'
 
     - task: CopyFiles@2
       displayName: Copy JAR
