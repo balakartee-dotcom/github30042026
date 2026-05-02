@@ -36,6 +36,7 @@ stages:
         goals: 'clean package'
         javaHomeOption: 'JDKVersion'
         jdkVersionOption: '1.8'
+        jdkDirectory: 'C:\Program Files\Java\jdk1.8.0_491'
 
     - task: CopyFiles@2
       displayName: Copy JAR
