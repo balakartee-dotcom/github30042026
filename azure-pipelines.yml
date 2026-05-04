@@ -175,4 +175,4 @@ stages:
               }
 
               docker run -d -p $(prodPort):8080 --name $(prodContainerName) $(imageName):$(imageTag)
-            displayName: Run PROD Container
+            displayName: Run and test PROD Container
