@@ -9,17 +9,27 @@ pool:
   name: Default
 
 variables:
-- group: Devvariablegroup
-  imageName: 'karthik20151987/springboot'
-  #dockerRegistryServiceConnection: 'dockerhub-connection'
-  jarName: 'springboot-hello-1.0.0.jar'
-  imageTag: '$(Build.BuildId)'
-  devContainerName: 'springboot-app-dev'
-  qaContainerName: 'springboot-app-qa'
-  prodContainerName: 'springboot-app-prod'
-  devPort: '8080'
-  qaPort: '8081'
-  prodPort: '8082'
+  - group: Devvariablegroup
+  - name: imageName
+    value: karthik20151987/springboot
+  #- name: dockerRegistryServiceConnection
+    #value: dockerhub-connection
+  - name: jarName
+    value: springboot-hello-1.0.0.jar
+  - name: imageTag
+    value: $(Build.BuildId)
+  - name: devContainerName
+    value: springboot-app-dev
+  - name: qaContainerName
+    value: springboot-app-qa
+  - name: prodContainerName
+    value: springboot-app-prod
+  - name: devPort
+    value: 8080
+  - name: qaPort
+    value: 8081
+  - name: prodPort
+    value: 8082
 
 stages:
 - stage: Build
